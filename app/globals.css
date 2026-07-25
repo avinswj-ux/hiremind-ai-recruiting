@@ -356,6 +356,14 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 .drawer-actions button,.modal-actions button{font-size:11px}.modal-head p{font-size:10px}.dropzone strong{font-size:12px}.dropzone span{font-size:10px}
 .upload-settings label>span,.upload-settings select,.privacy-tip p,.toast{font-size:10px}
 
+/* Readability V2: key operational text remains dense but readable at normal desktop distance. */
+.welcome-row h1{font-size:26px}.welcome-row p{font-size:13px}.crumb,.global-search input,.upload-button{font-size:13px}
+.stat-copy span{font-size:12px}.stat-copy strong{font-size:28px}.stat-copy small{font-size:11px}.stat-action{cursor:pointer;text-align:left;font:inherit}.stat-action:hover{border-color:#c9c2f7;box-shadow:0 8px 22px rgba(90,76,190,.1);transform:translateY(-1px)}.stat-arrow{margin-left:auto;color:#8175df;font-size:18px;font-style:normal;opacity:.7}
+.section-head h2{font-size:16px}.section-head>div>span,.filter-tabs button{font-size:12px}.table-head{font-size:11px}.candidate-info strong{font-size:13px}.candidate-info small{font-size:11px}.skill-list i,.all-skills span{font-size:10px}.skill-list em,.status,.time-cell{font-size:10px}
+.drawer-head span{font-size:15px}.drawer-head small{font-size:11px}.candidate-hero h2{font-size:21px}.candidate-hero p,.candidate-hero>div>span{font-size:12px}.ai-summary>span,.ai-summary p,.drawer-content h3,.dimension-list>div>div,.dimension-list strong,.evidence span,.evidence p,.fairness-note p,.fairness-note strong{font-size:12px}.drawer-actions button{font-size:12px}
+.modal-head h2{font-size:19px}.modal-head p,.dropzone span,.upload-settings label>span,.upload-settings select,.privacy-tip p,.job-form-grid label>span,.job-link-note p,.fair-config p,.toast{font-size:12px}.dropzone strong{font-size:14px}.confirm-dialog p,.confirm-dialog button{font-size:12px}
+.drawer-actions .danger-outline{border:1px solid #efcfcc;background:#fff9f8;color:#bd5551}.drawer-actions .danger-outline:hover{background:#fff0ef}
+
 /* Night mode */
 .app-shell.dark {
   --ink:#f0f1f6; --muted:#a1a7b7; --line:#303241; --soft:#20222f;

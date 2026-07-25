@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ApiCandidate, ApiJob } from "../lib/hiremind";
 
 type Theme = "light" | "dark";
-type CandidateFilter = "全部候选人" | "高匹配" | ApiCandidate["status"];
+type CandidateFilter = "全部候选人" | "高匹配" | "待 HR 处理" | ApiCandidate["status"];
 
 const statusLabel: Record<ApiJob["status"], string> = {
   open: "招聘中",
@@ -54,6 +54,7 @@ export default function Home() {
   const [jobOpen, setJobOpen] = useState(false);
   const [jobManagerOpen, setJobManagerOpen] = useState(false);
   const [pendingDeleteJob, setPendingDeleteJob] = useState<ApiJob | null>(null);
+  const [pendingDeleteCandidate, setPendingDeleteCandidate] = useState<ApiCandidate | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState("");
@@ -111,6 +112,7 @@ export default function Home() {
       const matchesFilter =
         filter === "全部候选人" ||
         (filter === "高匹配" && candidate.score >= 85) ||
+        (filter === "待 HR 处理" && ["待处理", "建议面试"].includes(candidate.status)) ||
         candidate.status === filter;
       return matchesQuery && matchesFilter;
     });
@@ -160,6 +162,29 @@ export default function Home() {
     } catch (error) {
       setPendingDeleteJob(null);
       showToast(error instanceof Error ? error.message : "岗位删除失败");
+    }
+  }
+
+  function focusCandidates(nextFilter: CandidateFilter) {
+    setFilter(nextFilter);
+    window.setTimeout(() => {
+      document.getElementById("candidate-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  }
+
+  async function confirmDeleteCandidate() {
+    if (!pendingDeleteCandidate) return;
+    const candidate = pendingDeleteCandidate;
+    try {
+      await api(`/api/candidates/${candidate.id}`, { method: "DELETE" });
+      setCandidates((items) => items.filter((item) => item.id !== candidate.id));
+      setSelected(null);
+      setPendingDeleteCandidate(null);
+      await loadJobs(currentJobId);
+      showToast(`${candidate.name} 已删除，审计记录已保留`);
+    } catch (error) {
+      setPendingDeleteCandidate(null);
+      showToast(error instanceof Error ? error.message : "候选人删除失败");
     }
   }
 
@@ -282,10 +307,10 @@ export default function Home() {
           </div>
 
           <div className="stats-grid">
-            <article className="stat-card"><div className="stat-icon violet">♙</div><div className="stat-copy"><span>候选人总数</span><strong>{candidates.length}</strong><small>当前岗位真实记录</small></div></article>
-            <article className="stat-card"><div className="stat-icon blue">✦</div><div className="stat-copy"><span>高匹配候选人</span><strong>{highMatch}</strong><small>综合评分 ≥ 85</small></div></article>
-            <article className="stat-card"><div className="stat-icon amber">◷</div><div className="stat-copy"><span>待 HR 处理</span><strong>{pending}</strong><small>等待最终判断</small></div></article>
-            <article className="stat-card"><div className="stat-icon green">✓</div><div className="stat-copy"><span>已约面试</span><strong>{interviews}</strong><small>由 HR 确认推进</small></div></article>
+            <button className="stat-card stat-action" onClick={() => focusCandidates("全部候选人")}><div className="stat-icon violet">♙</div><div className="stat-copy"><span>候选人总数</span><strong>{candidates.length}</strong><small>查看当前岗位全部记录</small></div><i className="stat-arrow">→</i></button>
+            <button className="stat-card stat-action" onClick={() => focusCandidates("高匹配")}><div className="stat-icon blue">✦</div><div className="stat-copy"><span>高匹配候选人</span><strong>{highMatch}</strong><small>综合评分 ≥ 85</small></div><i className="stat-arrow">→</i></button>
+            <button className="stat-card stat-action" onClick={() => focusCandidates("待 HR 处理")}><div className="stat-icon amber">◷</div><div className="stat-copy"><span>待 HR 处理</span><strong>{pending}</strong><small>查看等待最终判断的候选人</small></div><i className="stat-arrow">→</i></button>
+            <button className="stat-card stat-action" onClick={() => focusCandidates("已约面试")}><div className="stat-icon green">✓</div><div className="stat-copy"><span>已约面试</span><strong>{interviews}</strong><small>查看已推进面试的候选人</small></div><i className="stat-arrow">→</i></button>
           </div>
 
           {topCandidate ? (
@@ -330,7 +355,7 @@ export default function Home() {
             </div>
             <div className="candidate-toolbar">
               <div className="filter-tabs">
-                {(["全部候选人", "高匹配", "待处理", "已约面试", "人才库"] as CandidateFilter[]).map((item) => (
+                {(["全部候选人", "高匹配", "待 HR 处理", "已约面试", "人才库"] as CandidateFilter[]).map((item) => (
                   <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)}>
                     {item}{item === "全部候选人" && <span>{candidates.length}</span>}
                   </button>
@@ -387,6 +412,7 @@ export default function Home() {
               <div className="fairness-note"><span>◉</span><p><strong>公平性保护已开启</strong>本次评分未使用年龄、性别、照片、婚育等敏感信息。</p></div>
             </div>
             <div className="drawer-actions">
+              <button className="danger-outline" onClick={() => setPendingDeleteCandidate(selected)}>删除候选人</button>
               <button className="secondary" onClick={() => updateCandidateStatus(selected, "人才库")}>加入人才库</button>
               <button className="primary" onClick={() => updateCandidateStatus(selected, "已约面试")}>推进面试 <span>→</span></button>
             </div>
@@ -455,6 +481,15 @@ export default function Home() {
           <section className="confirm-dialog" role="alertdialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
             <div className="confirm-icon">!</div><h2>永久删除空岗位？</h2><p>即将删除「{pendingDeleteJob.title}」，此操作无法撤销。</p>
             <div><button onClick={() => setPendingDeleteJob(null)}>取消</button><button className="danger-confirm" onClick={confirmDeleteJob}>确认永久删除</button></div>
+          </section>
+        </div>
+      )}
+
+      {pendingDeleteCandidate && (
+        <div className="confirm-backdrop" onMouseDown={() => setPendingDeleteCandidate(null)}>
+          <section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-candidate-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="confirm-icon">!</div><h2 id="delete-candidate-title">删除候选人记录？</h2><p>即将删除「{pendingDeleteCandidate.name}」的简历分析、评分和当前状态。该操作无法撤销，但会保留删除审计记录。</p>
+            <div><button onClick={() => setPendingDeleteCandidate(null)}>取消</button><button className="danger-confirm" onClick={confirmDeleteCandidate}>确认删除候选人</button></div>
           </section>
         </div>
       )}

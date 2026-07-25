@@ -25,6 +25,9 @@ test("every visible primary control has a real action", async () => {
   assert.match(page, /fetch\(url, options\)/);
   assert.match(page, /\/api\/analyze/);
   assert.match(page, /\/api\/candidates\/\$\{candidate\.id\}/);
+  assert.match(page, /删除候选人/);
+  assert.match(page, /确认删除候选人/);
+  assert.match(page, /待 HR 处理/);
   assert.match(page, /scrollIntoView/);
   assert.match(page, /setTheme/);
   assert.match(page, /创建招聘岗位/);
@@ -36,6 +39,7 @@ test("every visible primary control has a real action", async () => {
   assert.match(page, /每批最多 200 份/);
   assert.doesNotMatch(page, /演示数据|即将上线|将在下一版本|可恢复处理队列/);
   assert.match(css, /\.app-shell\.dark/);
+  assert.match(css, /Readability V2/);
 });
 
 test("no hard-coded candidate or job records remain", async () => {
