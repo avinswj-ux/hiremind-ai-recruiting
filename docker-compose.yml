@@ -1,3 +1,5 @@
+name: hiremind
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -5,8 +7,6 @@ services:
       POSTGRES_DB: hiremind
       POSTGRES_USER: hiremind
       POSTGRES_PASSWORD: hiremind
-    ports:
-      - "5432:5432"
     volumes:
       - hiremind-postgres:/var/lib/postgresql/data
     healthcheck:
@@ -16,11 +16,10 @@ services:
       retries: 10
 
   api:
-    image: python:3.12-slim
+    build:
+      context: ./backend
     working_dir: /app
-    command: >
-      sh -c "pip install --no-cache-dir -r requirements.txt &&
-      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     env_file:
       - backend/.env
     environment:
@@ -28,17 +27,16 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - "8000:8000"
+      - "8020:8000"
     depends_on:
       postgres:
         condition: service_healthy
 
   worker:
-    image: python:3.12-slim
+    build:
+      context: ./backend
     working_dir: /app
-    command: >
-      sh -c "pip install --no-cache-dir -r requirements.txt &&
-      python -m app.worker"
+    command: python -m app.worker
     env_file:
       - backend/.env
     environment:

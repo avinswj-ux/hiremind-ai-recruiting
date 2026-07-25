@@ -29,7 +29,7 @@ cp backend/.env.example backend/.env
 docker compose up
 ```
 
-API 文档位于 `http://localhost:8000/docs`。
+API 文档位于 `http://localhost:8020/docs`。
 
 若不启动 PostgreSQL，后端会自动使用 SQLite 作为单机开发数据库：
 
