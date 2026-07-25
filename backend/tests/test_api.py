@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 os.environ["DATABASE_URL"] = "sqlite:///./data/test-hiremind.db"
+os.environ["DEEPSEEK_API_KEY"] = ""
 
 from fastapi.testclient import TestClient
 from sqlalchemy import delete
@@ -29,6 +30,14 @@ client = TestClient(app)
 def reset_database() -> None:
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+
+
+def test_branded_api_console():
+    response = client.get("/docs")
+    assert response.status_code == 200
+    assert "HireMind" in response.text
+    assert "DeepSeek 已配置" in response.text
+    assert "hiremind-api-theme" in response.text
 
 
 def create_job() -> str:

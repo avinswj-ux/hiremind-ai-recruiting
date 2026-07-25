@@ -24,6 +24,7 @@ from .audit import record_event
 from .config import settings
 from .database import create_schema, get_session
 from .dedup import find_exact_file_duplicate
+from .docs_ui import hiremind_docs_html
 from .entities import (
     AnalysisReportRecord,
     ApplicationRecord,
@@ -55,6 +56,9 @@ app = FastAPI(
     version="1.1.0",
     description="可追溯的 AI 招聘初筛、批量解析与人工决策 API",
     lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url="/openapi.json",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -65,6 +69,11 @@ app.add_middleware(
 )
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+
+@app.get("/docs", include_in_schema=False)
+def api_docs():
+    return hiremind_docs_html(title=settings.app_name, version="1.1.0")
 
 
 def new_id(prefix: str) -> str:
