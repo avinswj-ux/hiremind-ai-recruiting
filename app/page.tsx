@@ -12,6 +12,8 @@ const statusLabel: Record<ApiJob["status"], string> = {
   archived: "已归档",
 };
 
+const candidateStatusOptions: ApiCandidate["status"][] = ["待处理", "建议面试", "已约面试", "人才库"];
+
 function scoreTone(score: number) {
   if (score >= 85) return "high";
   if (score >= 70) return "medium";
@@ -365,7 +367,20 @@ export default function Home() {
             <div className="candidate-table">
               <div className="table-head"><span>候选人</span><span>核心技能</span><span>AI 匹配度</span><span>当前状态</span><span>分析时间</span><span /></div>
               {filtered.map((candidate) => (
-                <button className="candidate-row" key={candidate.id} onClick={() => setSelected(candidate)}>
+                <div
+                  className="candidate-row"
+                  key={candidate.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`查看 ${candidate.name} 的分析报告`}
+                  onClick={() => setSelected(candidate)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelected(candidate);
+                    }
+                  }}
+                >
                   <span className="candidate-info">
                     <i className={`candidate-avatar avatar-${avatarIndex(candidate.id)}`}>{initials(candidate.name)}</i>
                     <span><strong>{candidate.name}</strong><small>{[candidate.company, candidate.role, candidate.years].filter(Boolean).join(" · ") || candidate.fileName}</small></span>
@@ -375,10 +390,19 @@ export default function Home() {
                     {candidate.skills.length > 3 && <em>+{candidate.skills.length - 3}</em>}
                   </span>
                   <span className="score-cell"><i className={`score-pill ${scoreTone(candidate.score)}`}>{candidate.score}</i><span><i style={{ width: `${candidate.score}%` }} /></span></span>
-                  <span><i className={`status status-${candidate.status}`}>{candidate.status === "建议面试" && "✦ "}{candidate.status}</i></span>
+                  <span className="status-control" onClick={(event) => event.stopPropagation()}>
+                    <select
+                      aria-label={`修改 ${candidate.name} 的当前状态`}
+                      className={`status status-${candidate.status}`}
+                      value={candidate.status}
+                      onChange={(event) => updateCandidateStatus(candidate, event.target.value as ApiCandidate["status"])}
+                    >
+                      {candidateStatusOptions.map((status) => <option key={status} value={status}>{status === "建议面试" ? `✦ ${status}` : status}</option>)}
+                    </select>
+                  </span>
                   <span className="time-cell">{relativeTime(candidate.createdAt)}</span>
                   <span className="row-arrow">›</span>
-                </button>
+                </div>
               ))}
               {!loading && filtered.length === 0 && <div className="empty-state">{query || filter !== "全部候选人" ? "没有符合当前筛选条件的候选人。" : "暂无候选人，请上传真实简历开始分析。"}</div>}
             </div>

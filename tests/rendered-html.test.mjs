@@ -28,6 +28,8 @@ test("every visible primary control has a real action", async () => {
   assert.match(page, /删除候选人/);
   assert.match(page, /确认删除候选人/);
   assert.match(page, /待 HR 处理/);
+  assert.match(page, /修改 \$\{candidate\.name\} 的当前状态/);
+  assert.match(page, /candidateStatusOptions/);
   assert.match(page, /scrollIntoView/);
   assert.match(page, /setTheme/);
   assert.match(page, /创建招聘岗位/);

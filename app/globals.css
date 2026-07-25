@@ -196,8 +196,9 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 .candidate-table { width:100%; }
 .table-head, .candidate-row { display:grid; grid-template-columns:1.65fr 1.45fr 1fr .9fr .65fr 24px; align-items:center; column-gap:18px; padding:0 18px; }
 .table-head { height:33px; background:#fafbfc; color:#a0a5b1; font-size:8px; text-align:left; }
-.candidate-row { width:100%; min-height:62px; background:white; border:0; border-top:1px solid #f0f1f4; color:var(--ink); text-align:left; transition:.18s ease; }
+.candidate-row { width:100%; min-height:62px; background:white; border:0; border-top:1px solid #f0f1f4; color:var(--ink); text-align:left; transition:.18s ease; cursor:pointer; }
 .candidate-row:hover { background:#fbfaff; transform:translateX(2px); }
+.candidate-row:focus-visible { outline:2px solid #8b7ee8; outline-offset:-2px; }
 .candidate-info { display:flex; align-items:center; gap:10px; min-width:0; }
 .candidate-avatar { flex:0 0 auto; width:31px; height:31px; border-radius:9px; display:grid; place-items:center; font-style:normal; font-weight:700; font-size:9px; }
 .avatar-1 { background:linear-gradient(145deg,#dcd7ff,#b4a8fa);color:#5145ae}.avatar-2{background:linear-gradient(145deg,#d8f2e9,#9bd9c6);color:#22765e}.avatar-3{background:linear-gradient(145deg,#ffe7d4,#f6b98d);color:#945a31}.avatar-4{background:linear-gradient(145deg,#f5deed,#dfa4ca);color:#915176}.avatar-5{background:linear-gradient(145deg,#dce9f7,#a9c9e8);color:#416a92}
@@ -213,6 +214,10 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 .score-cell > span i { display:block; height:100%; background:#42b390; border-radius:4px; }
 .status { font-style:normal; font-size:7px; padding:4px 7px; border-radius:20px; white-space:nowrap; }
 .status-建议面试{background:#ebe9ff;color:#6657d4}.status-已约面试{background:#e5f6f0;color:#248367}.status-待处理{background:#fff3e3;color:#bd782a}.status-人才库{background:#eef0f4;color:#737b8c}
+.status-control { display:inline-flex; position:relative; }
+select.status { appearance:none; -webkit-appearance:none; border:0; padding:5px 22px 5px 9px; cursor:pointer; outline:0; font-family:inherit; }
+.status-control::after { content:"⌄"; position:absolute; right:8px; top:50%; transform:translateY(-53%); color:currentColor; font-size:11px; pointer-events:none; }
+select.status:focus-visible { box-shadow:0 0 0 3px rgba(108,92,231,.18); }
 .time-cell { color:#969ca9; font-size:8px; }.row-arrow { color:#bbc0ca; font-size:17px; }
 .empty-state { padding:45px; text-align:center; color:#9ca2af; font-size:10px; }
 
@@ -378,6 +383,7 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
   background:#1b1d29;border-color:#303241;color:#eef0f5;
 }
 .dark .candidate-row:hover { background:#232535; }
+.dark .status-建议面试{background:#302c55;color:#c1b9ff}.dark .status-已约面试{background:#193b32;color:#94dbc6}.dark .status-待处理{background:#3c3020;color:#f0c27c}.dark .status-人才库{background:#30333d;color:#b7bdca}
 .dark .candidate-row,.dark .candidate-toolbar,.dark .section-head.compact { border-color:#2c2e3c; }
 .dark .stat-copy span,.dark .stat-copy small,.dark .welcome-row p,.dark .section-head>div>span,
 .dark .candidate-info small,.dark .time-cell,.dark .activities p,.dark .pipeline-row>div:first-child {
