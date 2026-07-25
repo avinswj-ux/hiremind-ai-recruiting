@@ -642,7 +642,7 @@ export default function Home() {
               <label><span>岗位名称</span><input name="title" required defaultValue="高级 Python 后端工程师" /></label>
               <label><span>所属部门</span><input name="department" defaultValue="研发部" /></label>
               <label><span>工作地点</span><input name="location" defaultValue="深圳 / 香港" /></label>
-              <label><span>最低经验</span><select name="years" defaultValue="3"><option value="2">2 年</option><option value="3">3 年</option><option value="5">5 年</option></select></label>
+              <label><span>最低经验</span><select name="years" defaultValue="3"><option value="0">无经验</option><option value="1">1 年</option><option value="2">2 年</option><option value="3">3 年</option><option value="5">5 年及以上</option></select></label>
               <label className="full"><span>硬性要求</span><textarea name="mustHave" defaultValue={"Python\nFastAPI / Django\nPostgreSQL\nDocker"} /></label>
               <label className="full"><span>加分项</span><input name="niceToHave" defaultValue="LLM、Redis、Kubernetes、React" /></label>
             </div>
