@@ -105,6 +105,8 @@ def test_job_batch_analysis_decision_and_audit():
         f"/api/audit-events?entity_id={application_id}"
     ).json()
     assert any(row["action"] == "application.decision_changed" for row in events)
+    blocked_delete = client.delete(f"/api/jobs/{job_id}?actor=test-hr")
+    assert blocked_delete.status_code == 409
 
 
 def test_exact_file_duplicate_is_flagged():
@@ -140,3 +142,29 @@ def test_rejects_more_than_200_files():
         files=files,
     )
     assert response.status_code == 422
+
+
+def test_empty_job_can_pause_archive_restore_and_delete():
+    reset_database()
+    job_id = create_job()
+    paused = client.patch(
+        f"/api/jobs/{job_id}/status",
+        json={"status": "paused", "actor": "test-hr"},
+    )
+    assert paused.status_code == 200
+    assert paused.json()["status"] == "paused"
+    archived = client.patch(
+        f"/api/jobs/{job_id}/status",
+        json={"status": "archived", "actor": "test-hr"},
+    )
+    assert archived.json()["status"] == "archived"
+    restored = client.patch(
+        f"/api/jobs/{job_id}/status",
+        json={"status": "open", "actor": "test-hr"},
+    )
+    assert restored.json()["status"] == "open"
+    deleted = client.delete(f"/api/jobs/{job_id}?actor=test-hr")
+    assert deleted.status_code == 200
+    assert deleted.json()["deleted"] is True
+    events = client.get(f"/api/audit-events?entity_id={job_id}").json()
+    assert any(row["action"] == "job.deleted" for row in events)

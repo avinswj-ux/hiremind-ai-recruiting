@@ -43,6 +43,11 @@ class DecisionRequest(BaseModel):
     actor: str = Field(default="hr", max_length=80)
 
 
+class JobStatusRequest(BaseModel):
+    status: Literal["open", "paused", "archived"]
+    actor: str = Field(default="hr", max_length=80)
+
+
 class DuplicateResolutionRequest(BaseModel):
     resolution: Literal["merge", "keep_separate", "ignore"]
     actor: str = Field(default="hr", max_length=80)

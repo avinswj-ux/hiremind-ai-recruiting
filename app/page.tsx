@@ -28,7 +28,7 @@ type HiringJob = {
   location: string;
   candidates: number;
   highMatch: number;
-  status: "招聘中" | "已暂停";
+  status: "招聘中" | "已暂停" | "已归档";
   updated: string;
 };
 
@@ -189,6 +189,7 @@ export default function Home() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);
   const [jobManagerOpen, setJobManagerOpen] = useState(false);
+  const [pendingDeleteJob, setPendingDeleteJob] = useState<HiringJob | null>(null);
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -228,6 +229,11 @@ export default function Home() {
   }
 
   function startDemoBatch() {
+    const linkedJob = jobs.find((job) => job.title === currentJob);
+    if (!linkedJob || linkedJob.status !== "招聘中") {
+      showToast("当前岗位未在招聘中，请先恢复岗位再上传简历");
+      return;
+    }
     if (!selectedFiles.length) {
       showToast("请先选择至少 1 份简历");
       return;
@@ -247,6 +253,36 @@ export default function Home() {
         return next;
       });
     }, 520);
+  }
+
+  function setJobStatus(jobId: string, status: HiringJob["status"]) {
+    setJobs((items) =>
+      items.map((job) =>
+        job.id === jobId ? { ...job, status, updated: "刚刚" } : job
+      )
+    );
+    const target = jobs.find((job) => job.id === jobId);
+    const action = status === "招聘中" ? "恢复招聘" : status === "已暂停" ? "暂停招聘" : "归档";
+    showToast(`岗位「${target?.title || ""}」已${action}，操作已记录`);
+  }
+
+  function requestDeleteJob(job: HiringJob) {
+    if (job.candidates > 0) {
+      showToast(`该岗位关联 ${job.candidates} 位候选人，不能永久删除，请先归档`);
+      return;
+    }
+    setPendingDeleteJob(job);
+  }
+
+  function confirmDeleteJob() {
+    if (!pendingDeleteJob) return;
+    const remaining = jobs.filter((job) => job.id !== pendingDeleteJob.id);
+    setJobs(remaining);
+    if (currentJob === pendingDeleteJob.title) {
+      setCurrentJob(remaining.find((job) => job.status === "招聘中")?.title || remaining[0]?.title || "");
+    }
+    showToast(`空岗位「${pendingDeleteJob.title}」已永久删除，操作已记录`);
+    setPendingDeleteJob(null);
   }
 
   return (
@@ -541,7 +577,7 @@ export default function Home() {
               <label>
                 <span>关联岗位</span>
                 <select value={currentJob} onChange={(event) => setCurrentJob(event.target.value)}>
-                  {jobs.filter((job) => job.status === "招聘中").map((job) => <option key={job.id} value={job.title}>{job.title}</option>)}
+                  {jobs.map((job) => <option key={job.id} value={job.title} disabled={job.status !== "招聘中"}>{job.title}{job.status !== "招聘中" ? `（${job.status}）` : ""}</option>)}
                 </select>
               </label>
               <label><span>重复简历处理</span><select defaultValue="merge"><option value="merge">识别后合并为新版本</option><option>跳过重复文件</option></select></label>
@@ -596,14 +632,49 @@ export default function Home() {
                     </span>
                     <span className="job-metrics"><strong>{job.candidates}</strong><small>候选人</small></span>
                     <span className="job-metrics"><strong>{job.highMatch}</strong><small>高匹配</small></span>
-                    <em className={`job-status ${job.status === "招聘中" ? "open" : "paused"}`}>{job.status}</em>
+                    <em className={`job-status ${job.status === "招聘中" ? "open" : job.status === "已暂停" ? "paused" : "archived"}`}>{job.status}</em>
                   </button>
                 );
               })}
             </div>
+            <div className="job-action-bar">
+              <div>
+                <span>当前操作岗位</span>
+                <strong>{currentJob}</strong>
+              </div>
+              {(() => {
+                const job = jobs.find((item) => item.title === currentJob);
+                if (!job) return null;
+                return (
+                  <div className="job-action-buttons">
+                    {job.status === "招聘中" ? (
+                      <button type="button" onClick={() => setJobStatus(job.id, "已暂停")}>暂停招聘</button>
+                    ) : (
+                      <button type="button" onClick={() => setJobStatus(job.id, "招聘中")}>恢复招聘</button>
+                    )}
+                    <button type="button" onClick={() => setJobStatus(job.id, "已归档")}>归档岗位</button>
+                    <button type="button" className="danger" onClick={() => requestDeleteJob(job)}>永久删除</button>
+                  </div>
+                );
+              })()}
+            </div>
             <div className="job-manager-foot">
-              <span>选择岗位后，候选人、统计和上传任务将按该岗位展示。</span>
+              <span>有关联候选人的岗位只能归档；只有空岗位可以永久删除。</span>
               <button type="button" onClick={() => setJobManagerOpen(false)}>关闭</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {pendingDeleteJob && (
+        <div className="confirm-backdrop" onMouseDown={() => setPendingDeleteJob(null)}>
+          <section className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-job-title" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="confirm-icon">!</div>
+            <h2 id="delete-job-title">永久删除空岗位？</h2>
+            <p>即将删除「{pendingDeleteJob.title}」。此操作无法撤销，但会保留一条删除审计记录。</p>
+            <div>
+              <button type="button" onClick={() => setPendingDeleteJob(null)}>取消</button>
+              <button type="button" className="danger-confirm" onClick={confirmDeleteJob}>确认永久删除</button>
             </div>
           </section>
         </div>

@@ -323,8 +323,24 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 .job-metrics { text-align:center; }.job-metrics strong{font-size:13px}.job-metrics small{font-size:8px;color:#9ba1ae;margin-top:2px}
 .job-status { justify-self:end;font-size:9px;font-style:normal;padding:4px 7px;border-radius:20px;white-space:nowrap; }
 .job-status.open { background:#e6f7f1;color:#218264; }.job-status.paused{background:#f0f1f4;color:#7c8494}
+.job-status.archived { background:#f4ebeb;color:#996968; }
+.job-action-bar { display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;border-top:1px solid #eceef2;background:#fff; }
+.job-action-bar > div:first-child span,.job-action-bar > div:first-child strong { display:block; }
+.job-action-bar > div:first-child span { color:#9aa0ad;font-size:8px;margin-bottom:3px; }.job-action-bar > div:first-child strong{font-size:11px}
+.job-action-buttons { display:flex;gap:7px; }
+.job-action-buttons button { height:29px;border:1px solid #e0e3e8;background:#fff;color:#60697b;border-radius:7px;padding:0 10px;font-size:9px; }
+.job-action-buttons button:hover { background:#f7f7fa; }.job-action-buttons .danger{color:#bd5551;border-color:#efd5d3;background:#fffafa}
 .job-manager-foot { display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid #eceef2;background:#fafbfc; }
 .job-manager-foot span { color:#9299a8;font-size:9px; }.job-manager-foot button{height:29px;border:1px solid #e0e3e8;background:#fff;color:#60697b;border-radius:7px;padding:0 11px;font-size:10px}
+
+.confirm-backdrop { position:fixed;inset:0;background:rgba(14,16,27,.46);backdrop-filter:blur(4px);z-index:80;display:grid;place-items:center;padding:20px;animation:fadeIn .18s ease; }
+.confirm-dialog { width:min(390px,94vw);background:#fff;border-radius:14px;padding:23px;box-shadow:0 24px 70px rgba(20,22,37,.26);text-align:center;animation:modalIn .2s ease; }
+.confirm-icon { width:40px;height:40px;border-radius:50%;display:grid;place-items:center;margin:0 auto 12px;background:#fff0ef;color:#c45550;font-weight:750;font-size:18px; }
+.confirm-dialog h2 { font-size:16px;margin:0 0 8px; }.confirm-dialog p{font-size:10px;line-height:1.65;color:#7e8697;margin:0 auto 19px;max-width:320px}
+.confirm-dialog > div:last-child { display:flex;justify-content:center;gap:8px; }
+.confirm-dialog button { height:34px;border-radius:8px;padding:0 14px;font-size:10px; }
+.confirm-dialog button:first-child { border:1px solid #e1e3e8;background:#fff;color:#687183; }
+.danger-confirm { border:0;background:#c95752;color:#fff; }.danger-confirm:hover{background:#b74844}
 
 /* Readability pass: preserve density while moving body copy up one visual size. */
 .brand strong{font-size:16px}.brand small{font-size:11px}.workspace-switch strong{font-size:13px}.workspace-switch span{font-size:10px}
@@ -384,11 +400,13 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 .dark .job-list-item { background:#1b1d29;color:#eef0f5; }.dark .job-list-item:hover{background:#242533;border-color:#3b3c51}
 .dark .job-list-item.selected{background:#28263a;border-color:#4b456c}.dark .job-radio{border-color:#505363}
 .dark .job-manager-foot button{background:#292b38;border-color:#3a3c4b;color:#d4d7e0}.dark .job-main small{color:#9ca3b4}
+.dark .job-action-bar { background:#1b1d29;border-color:#303241; }.dark .job-action-buttons button{background:#292b38;border-color:#3a3c4b;color:#d4d7e0}.dark .job-action-buttons .danger{background:#312323;border-color:#593737;color:#efa4a0}
+.dark .confirm-dialog { background:#1b1d29;color:#eef0f5; }.dark .confirm-dialog p{color:#aeb4c1}.dark .confirm-dialog button:first-child{background:#292b38;border-color:#3a3c4b;color:#d4d7e0}
 .theme-button { font-size:16px;line-height:1; }
 
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideIn{from{transform:translateX(35px);opacity:.6}to{transform:none;opacity:1}}@keyframes modalIn{from{transform:translateY(10px) scale(.98);opacity:.6}to{transform:none;opacity:1}}@keyframes toastIn{from{transform:translate(-50%,8px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 
 @media(max-width:1050px){.stats-grid{grid-template-columns:repeat(2,1fr)}.table-head,.candidate-row{grid-template-columns:1.5fr 1.2fr .8fr .8fr 20px}.table-head span:nth-child(5),.candidate-row>span:nth-child(5){display:none}.bottom-grid{grid-template-columns:1fr}.insight-copy p{max-width:400px}}
-@media(max-width:760px){.sidebar{width:68px;min-width:68px;padding:18px 10px}.main-panel{margin-left:68px}.brand{padding:0 6px 20px}.brand>div:last-child,.workspace-switch>div:nth-child(2),.workspace-switch button,.nav-label,.nav-item:not(.active) em,.nav-item i,.sidebar-foot{display:none}.workspace-switch{padding:8px;justify-content:center}.nav-item{justify-content:center;padding:0}.nav-item>span{font-size:18px}.nav-item{font-size:0}.topbar{padding:0 16px}.global-search{display:none}.content{padding:22px 16px}.welcome-row{align-items:flex-start}.job-selector{display:none}.stats-grid{grid-template-columns:1fr 1fr}.insight-score{display:none}.insight-card>button{margin-right:0}.table-head,.candidate-row{grid-template-columns:1.5fr .7fr .8fr 18px}.table-head span:nth-child(2),.candidate-row>span:nth-child(2){display:none}.candidate-toolbar{overflow-x:auto}.table-actions{display:none}.filter-tabs{gap:14px;min-width:max-content}.evidence-grid,.upload-settings,.job-form-grid{grid-template-columns:1fr}.job-form-grid .full{grid-column:auto}.batch-copy>div:first-child{display:block}.batch-copy span{display:block;margin-top:3px}.batch-card>button{display:none}.job-list-item{grid-template-columns:24px 1fr 54px}.job-list-item .job-metrics:nth-of-type(2),.job-list-item .job-status{display:none}.job-manager-foot span{display:none}.job-manager-foot{justify-content:flex-end}}
+@media(max-width:760px){.sidebar{width:68px;min-width:68px;padding:18px 10px}.main-panel{margin-left:68px}.brand{padding:0 6px 20px}.brand>div:last-child,.workspace-switch>div:nth-child(2),.workspace-switch button,.nav-label,.nav-item:not(.active) em,.nav-item i,.sidebar-foot{display:none}.workspace-switch{padding:8px;justify-content:center}.nav-item{justify-content:center;padding:0}.nav-item>span{font-size:18px}.nav-item{font-size:0}.topbar{padding:0 16px}.global-search{display:none}.content{padding:22px 16px}.welcome-row{align-items:flex-start}.job-selector{display:none}.stats-grid{grid-template-columns:1fr 1fr}.insight-score{display:none}.insight-card>button{margin-right:0}.table-head,.candidate-row{grid-template-columns:1.5fr .7fr .8fr 18px}.table-head span:nth-child(2),.candidate-row>span:nth-child(2){display:none}.candidate-toolbar{overflow-x:auto}.table-actions{display:none}.filter-tabs{gap:14px;min-width:max-content}.evidence-grid,.upload-settings,.job-form-grid{grid-template-columns:1fr}.job-form-grid .full{grid-column:auto}.batch-copy>div:first-child{display:block}.batch-copy span{display:block;margin-top:3px}.batch-card>button{display:none}.job-list-item{grid-template-columns:24px 1fr 54px}.job-list-item .job-metrics:nth-of-type(2),.job-list-item .job-status{display:none}.job-manager-foot span{display:none}.job-manager-foot{justify-content:flex-end}.job-action-bar{display:block}.job-action-buttons{margin-top:9px;overflow:auto}.job-action-buttons button{white-space:nowrap}}
 @media(max-width:500px){.stats-grid{grid-template-columns:1fr}.stat-card{min-height:103px}.welcome-row h1{font-size:20px}.insight-card{align-items:flex-start}.ai-orb{width:38px;height:38px}.insight-card>button{display:none}.table-head,.candidate-row{grid-template-columns:1.6fr .7fr 20px}.table-head span:nth-child(4),.candidate-row>span:nth-child(4){display:none}.candidate-info small{max-width:145px}.global-search{display:none}.crumb span,.crumb b{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

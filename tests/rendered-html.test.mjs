@@ -46,6 +46,9 @@ test("includes bulk processing, job creation, and theme controls", async () => {
   assert.match(page, /选择当前岗位/);
   assert.match(page, /演示数据/);
   assert.match(page, /<option value="0">无经验<\/option>/);
+  assert.match(page, /暂停招聘/);
+  assert.match(page, /归档岗位/);
+  assert.match(page, /确认永久删除/);
   assert.match(page, /单批最多 200 份/);
   assert.match(page, /切换至夜间模式/);
   assert.match(page, /可恢复处理队列/);

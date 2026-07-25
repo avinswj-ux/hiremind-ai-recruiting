@@ -41,6 +41,7 @@ from .schemas import (
     DecisionRequest,
     DuplicateResolutionRequest,
     JobCreateRequest,
+    JobStatusRequest,
 )
 
 @asynccontextmanager
@@ -221,6 +222,68 @@ def get_job(job_id: str, session: SessionDep):
     if not job:
         raise HTTPException(404, "岗位不存在")
     return job_dict(job)
+
+
+@app.patch("/api/jobs/{job_id}/status")
+def update_job_status(job_id: str, body: JobStatusRequest, session: SessionDep):
+    job = session.get(JobRecord, job_id)
+    if not job:
+        raise HTTPException(404, "岗位不存在")
+    before = {"status": job.status}
+    job.status = body.status
+    record_event(
+        session,
+        actor=body.actor,
+        action="job.status_changed",
+        entity_type="job",
+        entity_id=job.id,
+        before=before,
+        after={"status": job.status},
+    )
+    session.commit()
+    return job_dict(job)
+
+
+@app.delete("/api/jobs/{job_id}")
+def delete_job(
+    job_id: str,
+    session: SessionDep,
+    actor: str = Query(default="hr", max_length=80),
+):
+    job = session.get(JobRecord, job_id)
+    if not job:
+        raise HTTPException(404, "岗位不存在")
+    application_count = session.scalar(
+        select(func.count())
+        .select_from(ApplicationRecord)
+        .where(ApplicationRecord.job_id == job_id)
+    )
+    batch_count = session.scalar(
+        select(func.count())
+        .select_from(UploadBatchRecord)
+        .where(UploadBatchRecord.job_id == job_id)
+    )
+    if application_count or batch_count:
+        raise HTTPException(
+            409,
+            {
+                "message": "岗位存在关联候选人或上传批次，不能永久删除，请改为归档",
+                "applications": application_count,
+                "batches": batch_count,
+            },
+        )
+    snapshot = {"title": job.title, "department": job.department, "status": job.status}
+    record_event(
+        session,
+        actor=actor,
+        action="job.deleted",
+        entity_type="job",
+        entity_id=job.id,
+        before=snapshot,
+    )
+    session.delete(job)
+    session.commit()
+    return {"deleted": True, "id": job_id}
 
 
 @app.post("/api/upload-batches", status_code=202)
