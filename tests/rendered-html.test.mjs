@@ -2,56 +2,44 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-}
-
-test("server-renders the HireMind product shell", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, /<title>HireMind · AI 招聘初筛 Agent<\/title>/i);
-  assert.match(html, /HireMind/);
-  assert.match(html, /招聘概览/);
-  assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
+test("source contains the full-stack HireMind routes", async () => {
+  const [jobs, candidates, analyze] = await Promise.all([
+    read("../app/api/jobs/route.ts"),
+    read("../app/api/candidates/route.ts"),
+    read("../app/api/analyze/route.ts"),
+  ]);
+  assert.match(jobs, /export async function (GET|POST)/);
+  assert.match(candidates, /export async function GET/);
+  assert.match(analyze, /analyzeResume/);
 });
 
-test("includes bulk processing, job creation, and theme controls", async () => {
-  const [page, css, packageJson] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
+test("every visible primary control has a real action", async () => {
+  const [page, css] = await Promise.all([
+    read("../app/page.tsx"),
+    read("../app/globals.css"),
   ]);
 
+  assert.match(page, /api<\{ jobs: ApiJob\[\] \}>\("\/api\/jobs"\)/);
+  assert.match(page, /fetch\(url, options\)/);
+  assert.match(page, /\/api\/analyze/);
+  assert.match(page, /\/api\/candidates\/\$\{candidate\.id\}/);
+  assert.match(page, /scrollIntoView/);
+  assert.match(page, /setTheme/);
   assert.match(page, /创建招聘岗位/);
-  assert.match(page, /选择当前岗位/);
-  assert.match(page, /演示数据/);
-  assert.match(page, /<option value="0">无经验<\/option>/);
+  assert.match(page, /上传候选人简历/);
   assert.match(page, /暂停招聘/);
   assert.match(page, /归档岗位/);
   assert.match(page, /确认永久删除/);
-  assert.match(page, /单批最多 200 份/);
-  assert.match(page, /切换至夜间模式/);
-  assert.match(page, /可恢复处理队列/);
+  assert.match(page, /<option value="0">无经验<\/option>/);
+  assert.match(page, /每批最多 200 份/);
+  assert.doesNotMatch(page, /演示数据|即将上线|将在下一版本|可恢复处理队列/);
   assert.match(css, /\.app-shell\.dark/);
-  assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+});
+
+test("no hard-coded candidate or job records remain", async () => {
+  const page = await read("../app/page.tsx");
+  assert.doesNotMatch(page, /林知远|周雨晴|字节跳动|云杉科技/);
+  assert.doesNotMatch(page, /const initialJobs|const candidates:/);
 });

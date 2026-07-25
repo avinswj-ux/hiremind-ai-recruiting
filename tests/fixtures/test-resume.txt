@@ -1,0 +1,8 @@
+测试候选人
+邮箱：candidate@example.com
+所在地：深圳
+应聘方向：AI 产品工程师
+2 年 Python 与 API 开发经验
+技能：Python、LLM、FastAPI、React、PostgreSQL
+项目经历：负责企业知识库问答系统，完成模型接入、检索增强与 API 服务开发。
+教育背景：计算机科学本科
