@@ -299,6 +299,32 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 .job-form-grid .full { grid-column:1/-1; }
 .fair-config { display:flex;gap:9px;background:#f6f5ff;border:1px solid #e5e1ff;padding:10px 11px;border-radius:8px;margin-top:14px;color:#6759c6; }
 .fair-config p { margin:0;color:#777f90;font-size:9px;line-height:1.5; }.fair-config strong{display:block;color:#4f466f;}
+.job-link-note { display:flex;gap:8px;margin-top:12px;padding:10px 11px;border-radius:8px;background:#f7f6ff;border:1px solid #e6e2ff;color:#6759c6; }
+.job-link-note p { margin:0;color:#737b8d;font-size:10px;line-height:1.5; }.job-link-note strong{color:#5f53bf;font-weight:650;}
+
+.job-manager { width:min(720px,96vw);padding:0;overflow:hidden; }
+.job-manager .modal-head { padding:20px 21px 16px;border-bottom:1px solid #eceef2; }
+.job-manager-toolbar { display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:#fafbfc;border-bottom:1px solid #eceef2; }
+.job-manager-toolbar > span { color:#70798b;font-size:11px; }.job-manager-toolbar > span b{color:#5549bd;background:#efedff;padding:2px 7px;border-radius:12px;margin-left:4px;}
+.job-manager-toolbar > span i { font-style:normal;font-size:8px;color:#9299a8;border:1px solid #dfe2e8;border-radius:4px;padding:2px 5px;margin-left:7px; }
+.job-manager-toolbar .primary { height:32px;border-radius:7px;padding:0 11px;font-size:10px; }
+.job-list { max-height:410px;overflow:auto;padding:7px 10px; }
+.job-list-item {
+  width:100%;display:grid;grid-template-columns:26px minmax(220px,1fr) 58px 58px 68px;
+  gap:12px;align-items:center;padding:12px 10px;border:1px solid transparent;border-radius:9px;
+  background:#fff;color:#242d40;text-align:left;transition:.16s ease;
+}
+.job-list-item:hover { background:#faf9ff;border-color:#e8e4ff; }
+.job-list-item.selected { background:#f7f5ff;border-color:#dcd6ff;box-shadow:inset 3px 0 #7465e5; }
+.job-radio { width:19px;height:19px;border:1.5px solid #d5d8e0;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:10px;font-style:normal; }
+.job-list-item.selected .job-radio { background:#6b5ce1;border-color:#6b5ce1; }
+.job-main strong,.job-main small,.job-metrics strong,.job-metrics small { display:block; }
+.job-main strong { font-size:12px;margin-bottom:4px; }.job-main small { color:#959cab;font-size:9px; }
+.job-metrics { text-align:center; }.job-metrics strong{font-size:13px}.job-metrics small{font-size:8px;color:#9ba1ae;margin-top:2px}
+.job-status { justify-self:end;font-size:9px;font-style:normal;padding:4px 7px;border-radius:20px;white-space:nowrap; }
+.job-status.open { background:#e6f7f1;color:#218264; }.job-status.paused{background:#f0f1f4;color:#7c8494}
+.job-manager-foot { display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid #eceef2;background:#fafbfc; }
+.job-manager-foot span { color:#9299a8;font-size:9px; }.job-manager-foot button{height:29px;border:1px solid #e0e3e8;background:#fff;color:#60697b;border-radius:7px;padding:0 11px;font-size:10px}
 
 /* Readability pass: preserve density while moving body copy up one visual size. */
 .brand strong{font-size:16px}.brand small{font-size:11px}.workspace-switch strong{font-size:13px}.workspace-switch span{font-size:10px}
@@ -351,12 +377,18 @@ kbd { color: #969cab; border: 1px solid #dddfe5; background: #fff; box-shadow: 0
 }
 .dark .privacy-tip { background:#182822;border-color:#2c493f; }.dark .privacy-tip p{color:#a5b9b2}.dark .privacy-tip strong{color:#d0e5de}
 .dark .fair-config { background:#262338;border-color:#403b62; }.dark .fair-config p{color:#adb2c1}.dark .fair-config strong{color:#ddd8ff}
+.dark .job-link-note { background:#262338;border-color:#403b62; }.dark .job-link-note p{color:#b0b5c4}.dark .job-link-note strong{color:#c6bff7}
 .dark .batch-card { border-color:#393653; }.dark .batch-copy span{color:#a3a9b7}.dark .batch-card>button{background:#282637;border-color:#45405f;color:#bcb4ed}
+.dark .job-manager .modal-head,.dark .job-manager-toolbar,.dark .job-manager-foot { border-color:#303241; }
+.dark .job-manager-toolbar,.dark .job-manager-foot { background:#20222e; }
+.dark .job-list-item { background:#1b1d29;color:#eef0f5; }.dark .job-list-item:hover{background:#242533;border-color:#3b3c51}
+.dark .job-list-item.selected{background:#28263a;border-color:#4b456c}.dark .job-radio{border-color:#505363}
+.dark .job-manager-foot button{background:#292b38;border-color:#3a3c4b;color:#d4d7e0}.dark .job-main small{color:#9ca3b4}
 .theme-button { font-size:16px;line-height:1; }
 
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideIn{from{transform:translateX(35px);opacity:.6}to{transform:none;opacity:1}}@keyframes modalIn{from{transform:translateY(10px) scale(.98);opacity:.6}to{transform:none;opacity:1}}@keyframes toastIn{from{transform:translate(-50%,8px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 
 @media(max-width:1050px){.stats-grid{grid-template-columns:repeat(2,1fr)}.table-head,.candidate-row{grid-template-columns:1.5fr 1.2fr .8fr .8fr 20px}.table-head span:nth-child(5),.candidate-row>span:nth-child(5){display:none}.bottom-grid{grid-template-columns:1fr}.insight-copy p{max-width:400px}}
-@media(max-width:760px){.sidebar{width:68px;min-width:68px;padding:18px 10px}.main-panel{margin-left:68px}.brand{padding:0 6px 20px}.brand>div:last-child,.workspace-switch>div:nth-child(2),.workspace-switch button,.nav-label,.nav-item:not(.active) em,.nav-item i,.sidebar-foot{display:none}.workspace-switch{padding:8px;justify-content:center}.nav-item{justify-content:center;padding:0}.nav-item>span{font-size:18px}.nav-item{font-size:0}.topbar{padding:0 16px}.global-search{display:none}.content{padding:22px 16px}.welcome-row{align-items:flex-start}.job-selector{display:none}.stats-grid{grid-template-columns:1fr 1fr}.insight-score{display:none}.insight-card>button{margin-right:0}.table-head,.candidate-row{grid-template-columns:1.5fr .7fr .8fr 18px}.table-head span:nth-child(2),.candidate-row>span:nth-child(2){display:none}.candidate-toolbar{overflow-x:auto}.table-actions{display:none}.filter-tabs{gap:14px;min-width:max-content}.evidence-grid,.upload-settings,.job-form-grid{grid-template-columns:1fr}.job-form-grid .full{grid-column:auto}.batch-copy>div:first-child{display:block}.batch-copy span{display:block;margin-top:3px}.batch-card>button{display:none}}
+@media(max-width:760px){.sidebar{width:68px;min-width:68px;padding:18px 10px}.main-panel{margin-left:68px}.brand{padding:0 6px 20px}.brand>div:last-child,.workspace-switch>div:nth-child(2),.workspace-switch button,.nav-label,.nav-item:not(.active) em,.nav-item i,.sidebar-foot{display:none}.workspace-switch{padding:8px;justify-content:center}.nav-item{justify-content:center;padding:0}.nav-item>span{font-size:18px}.nav-item{font-size:0}.topbar{padding:0 16px}.global-search{display:none}.content{padding:22px 16px}.welcome-row{align-items:flex-start}.job-selector{display:none}.stats-grid{grid-template-columns:1fr 1fr}.insight-score{display:none}.insight-card>button{margin-right:0}.table-head,.candidate-row{grid-template-columns:1.5fr .7fr .8fr 18px}.table-head span:nth-child(2),.candidate-row>span:nth-child(2){display:none}.candidate-toolbar{overflow-x:auto}.table-actions{display:none}.filter-tabs{gap:14px;min-width:max-content}.evidence-grid,.upload-settings,.job-form-grid{grid-template-columns:1fr}.job-form-grid .full{grid-column:auto}.batch-copy>div:first-child{display:block}.batch-copy span{display:block;margin-top:3px}.batch-card>button{display:none}.job-list-item{grid-template-columns:24px 1fr 54px}.job-list-item .job-metrics:nth-of-type(2),.job-list-item .job-status{display:none}.job-manager-foot span{display:none}.job-manager-foot{justify-content:flex-end}}
 @media(max-width:500px){.stats-grid{grid-template-columns:1fr}.stat-card{min-height:103px}.welcome-row h1{font-size:20px}.insight-card{align-items:flex-start}.ai-orb{width:38px;height:38px}.insight-card>button{display:none}.table-head,.candidate-row{grid-template-columns:1.6fr .7fr 20px}.table-head span:nth-child(4),.candidate-row>span:nth-child(4){display:none}.candidate-info small{max-width:145px}.global-search{display:none}.crumb span,.crumb b{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

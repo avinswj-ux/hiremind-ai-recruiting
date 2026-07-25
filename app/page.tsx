@@ -21,6 +21,24 @@ type Candidate = {
   dimensions: { label: string; score: number; note: string }[];
 };
 
+type HiringJob = {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  candidates: number;
+  highMatch: number;
+  status: "招聘中" | "已暂停";
+  updated: string;
+};
+
+const initialJobs: HiringJob[] = [
+  { id: "python", title: "高级 Python 后端工程师", department: "研发部", location: "深圳 / 香港", candidates: 24, highMatch: 6, status: "招聘中", updated: "12 分钟前" },
+  { id: "ai-app", title: "AI 应用工程师", department: "AI 产品部", location: "深圳", candidates: 18, highMatch: 4, status: "招聘中", updated: "昨天" },
+  { id: "product", title: "高级产品经理", department: "产品部", location: "上海 / 远程", candidates: 31, highMatch: 8, status: "招聘中", updated: "2 天前" },
+  { id: "design", title: "产品设计师", department: "设计部", location: "深圳", candidates: 12, highMatch: 2, status: "已暂停", updated: "5 天前" },
+];
+
 const candidates: Candidate[] = [
   {
     id: 1,
@@ -170,11 +188,13 @@ export default function Home() {
   const [filter, setFilter] = useState("全部候选人");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [jobOpen, setJobOpen] = useState(false);
+  const [jobManagerOpen, setJobManagerOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [batchFiles, setBatchFiles] = useState(0);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [jobs, setJobs] = useState<HiringJob[]>(initialJobs);
   const [currentJob, setCurrentJob] = useState("高级 Python 后端工程师");
 
   useEffect(() => {
@@ -257,7 +277,7 @@ export default function Home() {
               key={label}
               onClick={() => {
                 setActiveNav(label);
-                if (label === "岗位管理") setJobOpen(true);
+                if (label === "岗位管理") setJobManagerOpen(true);
                 else if (label !== "工作台") showToast(`${label}模块将在后续页面中开放`);
               }}
             >
@@ -323,7 +343,7 @@ export default function Home() {
             </div>
             <div className="job-selector">
               <span>当前岗位</span>
-              <button onClick={() => setJobOpen(true)}>{currentJob} <b>⌄</b></button>
+              <button onClick={() => setJobManagerOpen(true)}>{currentJob} <b>⌄</b></button>
             </div>
           </div>
 
@@ -460,7 +480,7 @@ export default function Home() {
         <div className="drawer-backdrop" onMouseDown={() => setSelected(null)}>
           <aside className="detail-drawer" onMouseDown={(event) => event.stopPropagation()}>
             <div className="drawer-head">
-              <div><span>候选人分析报告</span><small>AI 生成 · 已脱敏评估</small></div>
+              <div><span>候选人分析报告</span><small>匹配岗位：{currentJob} · 已脱敏评估</small></div>
               <button aria-label="关闭详情" onClick={() => setSelected(null)}>×</button>
             </div>
             <div className="candidate-hero">
@@ -518,12 +538,74 @@ export default function Home() {
               <span>{selectedFiles.length ? "可继续添加，单批最多 200 份" : "支持 PDF、DOCX、TXT，单个文件不超过 20 MB"}</span>
             </label>
             <div className="upload-settings">
-              <label><span>关联岗位</span><select defaultValue="python"><option value="python">高级 Python 后端工程师</option><option>产品经理</option><option>AI 应用工程师</option></select></label>
+              <label>
+                <span>关联岗位</span>
+                <select value={currentJob} onChange={(event) => setCurrentJob(event.target.value)}>
+                  {jobs.filter((job) => job.status === "招聘中").map((job) => <option key={job.id} value={job.title}>{job.title}</option>)}
+                </select>
+              </label>
               <label><span>重复简历处理</span><select defaultValue="merge"><option value="merge">识别后合并为新版本</option><option>跳过重复文件</option></select></label>
             </div>
+            <div className="job-link-note"><span>↗</span><p>本批简历将分别与<strong>「{currentJob}」</strong>的硬性条件、加分项和评分权重进行匹配，并生成独立分析报告。</p></div>
             <div className="privacy-tip"><span>⌾</span><p><strong>隐私保护</strong>简历仅用于本次招聘评估，敏感信息会被加密存储。</p></div>
             <div className="modal-actions"><button onClick={() => setUploadOpen(false)}>取消</button><button className="primary" onClick={startDemoBatch}>开始解析{selectedFiles.length ? `（${selectedFiles.length}）` : ""}</button></div>
           </div>
+        </div>
+      )}
+
+      {jobManagerOpen && (
+        <div className="modal-backdrop" onMouseDown={() => setJobManagerOpen(false)}>
+          <section className="upload-modal job-manager" onMouseDown={(event) => event.stopPropagation()}>
+            <div className="modal-head">
+              <div><h2>岗位管理</h2><p>选择一个岗位作为当前工作台，或创建新的招聘岗位</p></div>
+              <button type="button" onClick={() => setJobManagerOpen(false)}>×</button>
+            </div>
+            <div className="job-manager-toolbar">
+              <span>全部岗位 <b>{jobs.length}</b><i>演示数据</i></span>
+              <button
+                className="primary"
+                onClick={() => {
+                  setJobManagerOpen(false);
+                  setJobOpen(true);
+                }}
+              >
+                ＋ 创建岗位
+              </button>
+            </div>
+            <div className="job-list" role="listbox" aria-label="选择当前岗位">
+              {jobs.map((job) => {
+                const isCurrent = currentJob === job.title;
+                return (
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isCurrent}
+                    className={`job-list-item ${isCurrent ? "selected" : ""}`}
+                    key={job.id}
+                    onClick={() => {
+                      setCurrentJob(job.title);
+                      setJobManagerOpen(false);
+                      setActiveNav("工作台");
+                      showToast(`已切换至「${job.title}」`);
+                    }}
+                  >
+                    <i className="job-radio">{isCurrent ? "✓" : ""}</i>
+                    <span className="job-main">
+                      <strong>{job.title}</strong>
+                      <small>{job.department} · {job.location} · 更新于 {job.updated}</small>
+                    </span>
+                    <span className="job-metrics"><strong>{job.candidates}</strong><small>候选人</small></span>
+                    <span className="job-metrics"><strong>{job.highMatch}</strong><small>高匹配</small></span>
+                    <em className={`job-status ${job.status === "招聘中" ? "open" : "paused"}`}>{job.status}</em>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="job-manager-foot">
+              <span>选择岗位后，候选人、统计和上传任务将按该岗位展示。</span>
+              <button type="button" onClick={() => setJobManagerOpen(false)}>关闭</button>
+            </div>
+          </section>
         </div>
       )}
 
@@ -536,6 +618,19 @@ export default function Home() {
               event.preventDefault();
               const data = new FormData(event.currentTarget);
               const title = String(data.get("title") || "未命名岗位");
+              const department = String(data.get("department") || "未分配部门");
+              const location = String(data.get("location") || "待定");
+              const newJob: HiringJob = {
+                id: `job-${Date.now()}`,
+                title,
+                department,
+                location,
+                candidates: 0,
+                highMatch: 0,
+                status: "招聘中",
+                updated: "刚刚",
+              };
+              setJobs((items) => [newJob, ...items]);
               setCurrentJob(title);
               setJobOpen(false);
               setActiveNav("工作台");
