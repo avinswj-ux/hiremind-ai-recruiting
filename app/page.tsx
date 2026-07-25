@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Candidate = {
   id: number;
@@ -169,7 +169,22 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("全部候选人");
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [jobOpen, setJobOpen] = useState(false);
   const [toast, setToast] = useState("");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [batchFiles, setBatchFiles] = useState(0);
+  const [batchProgress, setBatchProgress] = useState(0);
+  const [currentJob, setCurrentJob] = useState("高级 Python 后端工程师");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("hiremind-theme");
+    if (saved === "dark") setTheme("dark");
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("hiremind-theme", theme);
+  }, [theme]);
 
   const filtered = useMemo(() => {
     return candidates.filter((candidate) => {
@@ -192,8 +207,30 @@ export default function Home() {
     window.setTimeout(() => setToast(""), 2600);
   }
 
+  function startDemoBatch() {
+    if (!selectedFiles.length) {
+      showToast("请先选择至少 1 份简历");
+      return;
+    }
+    const count = selectedFiles.length;
+    setBatchFiles(count);
+    setBatchProgress(8);
+    setUploadOpen(false);
+    showToast(`${count} 份简历已进入可恢复处理队列`);
+    const timer = window.setInterval(() => {
+      setBatchProgress((progress) => {
+        const next = Math.min(100, progress + Math.max(3, Math.round(Math.random() * 13)));
+        if (next === 100) {
+          window.clearInterval(timer);
+          window.setTimeout(() => showToast(`批次处理完成，发现 ${Math.min(2, Math.floor(count / 10))} 份重复简历`), 150);
+        }
+        return next;
+      });
+    }, 520);
+  }
+
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${theme === "dark" ? "dark" : ""}`}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark"><span>hi</span></div>
@@ -220,7 +257,8 @@ export default function Home() {
               key={label}
               onClick={() => {
                 setActiveNav(label);
-                if (label !== "工作台") showToast(`${label}模块将在下一版本开放`);
+                if (label === "岗位管理") setJobOpen(true);
+                else if (label !== "工作台") showToast(`${label}模块将在后续页面中开放`);
               }}
             >
               <span>{icon}</span>{label}
@@ -263,6 +301,14 @@ export default function Home() {
               />
               <kbd>⌘ K</kbd>
             </label>
+            <button
+              className="icon-button theme-button"
+              aria-label={theme === "light" ? "切换至夜间模式" : "切换至白天模式"}
+              title={theme === "light" ? "夜间模式" : "白天模式"}
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              {theme === "light" ? "☾" : "☀"}
+            </button>
             <button className="icon-button" aria-label="通知" onClick={() => showToast("没有新的待办通知")}>♢<i /></button>
             <button className="upload-button" onClick={() => setUploadOpen(true)}><span>＋</span>上传简历</button>
           </div>
@@ -277,7 +323,7 @@ export default function Home() {
             </div>
             <div className="job-selector">
               <span>当前岗位</span>
-              <button>高级 Python 后端工程师 <b>⌄</b></button>
+              <button onClick={() => setJobOpen(true)}>{currentJob} <b>⌄</b></button>
             </div>
           </div>
 
@@ -315,6 +361,21 @@ export default function Home() {
             <button onClick={() => setSelected(candidates[0])}>查看候选人 <span>→</span></button>
             <div className="insight-score"><strong>92</strong><span>最高匹配分</span></div>
           </section>
+
+          {batchFiles > 0 && (
+            <section className="batch-card">
+              <div className="batch-icon">{batchProgress === 100 ? "✓" : "↻"}</div>
+              <div className="batch-copy">
+                <div>
+                  <strong>{batchProgress === 100 ? "批次解析完成" : "批次正在解析"}</strong>
+                  <span>共 {batchFiles} 份简历 · 数据已持久化，关闭页面也不会中断</span>
+                </div>
+                <div className="batch-progress"><i style={{ width: `${batchProgress}%` }} /></div>
+              </div>
+              <strong className="batch-percent">{batchProgress}%</strong>
+              <button onClick={() => showToast("已打开批次审计详情")}>查看详情</button>
+            </section>
+          )}
 
           <section className="candidate-section">
             <div className="section-head">
@@ -442,16 +503,57 @@ export default function Home() {
           <div className="upload-modal" onMouseDown={(event) => event.stopPropagation()}>
             <div className="modal-head"><div><h2>上传候选人简历</h2><p>上传后 AI 将自动解析、去重并完成岗位匹配</p></div><button onClick={() => setUploadOpen(false)}>×</button></div>
             <label className="dropzone">
-              <input type="file" multiple accept=".pdf,.doc,.docx,.txt" onChange={() => showToast("Demo 模式：文件已进入解析队列")} />
-              <i>⇧</i><strong>拖放简历到这里，或点击选择文件</strong><span>支持 PDF、DOCX、TXT，单个文件不超过 20 MB</span>
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.docx,.txt"
+                onChange={(event) => {
+                  const files = Array.from(event.target.files || []).slice(0, 200);
+                  setSelectedFiles(files);
+                  if (files.length) showToast(`已选择 ${files.length} 份简历`);
+                }}
+              />
+              <i>{selectedFiles.length ? "✓" : "⇧"}</i>
+              <strong>{selectedFiles.length ? `已选择 ${selectedFiles.length} 份简历` : "拖放简历到这里，或点击选择文件"}</strong>
+              <span>{selectedFiles.length ? "可继续添加，单批最多 200 份" : "支持 PDF、DOCX、TXT，单个文件不超过 20 MB"}</span>
             </label>
             <div className="upload-settings">
               <label><span>关联岗位</span><select defaultValue="python"><option value="python">高级 Python 后端工程师</option><option>产品经理</option><option>AI 应用工程师</option></select></label>
               <label><span>重复简历处理</span><select defaultValue="merge"><option value="merge">识别后合并为新版本</option><option>跳过重复文件</option></select></label>
             </div>
             <div className="privacy-tip"><span>⌾</span><p><strong>隐私保护</strong>简历仅用于本次招聘评估，敏感信息会被加密存储。</p></div>
-            <div className="modal-actions"><button onClick={() => setUploadOpen(false)}>取消</button><button className="primary" onClick={() => { setUploadOpen(false); showToast("3 份简历已进入 AI 解析队列"); }}>开始解析</button></div>
+            <div className="modal-actions"><button onClick={() => setUploadOpen(false)}>取消</button><button className="primary" onClick={startDemoBatch}>开始解析{selectedFiles.length ? `（${selectedFiles.length}）` : ""}</button></div>
           </div>
+        </div>
+      )}
+
+      {jobOpen && (
+        <div className="modal-backdrop" onMouseDown={() => setJobOpen(false)}>
+          <form
+            className="upload-modal job-modal"
+            onMouseDown={(event) => event.stopPropagation()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              const title = String(data.get("title") || "未命名岗位");
+              setCurrentJob(title);
+              setJobOpen(false);
+              setActiveNav("工作台");
+              showToast(`岗位「${title}」已创建并写入审计日志`);
+            }}
+          >
+            <div className="modal-head"><div><h2>创建招聘岗位</h2><p>配置硬性要求与评分基准，后续每次调整都会保留版本记录</p></div><button type="button" onClick={() => setJobOpen(false)}>×</button></div>
+            <div className="job-form-grid">
+              <label><span>岗位名称</span><input name="title" required defaultValue="高级 Python 后端工程师" /></label>
+              <label><span>所属部门</span><input name="department" defaultValue="研发部" /></label>
+              <label><span>工作地点</span><input name="location" defaultValue="深圳 / 香港" /></label>
+              <label><span>最低经验</span><select name="years" defaultValue="3"><option value="2">2 年</option><option value="3">3 年</option><option value="5">5 年</option></select></label>
+              <label className="full"><span>硬性要求</span><textarea name="mustHave" defaultValue={"Python\nFastAPI / Django\nPostgreSQL\nDocker"} /></label>
+              <label className="full"><span>加分项</span><input name="niceToHave" defaultValue="LLM、Redis、Kubernetes、React" /></label>
+            </div>
+            <div className="fair-config"><span>✦</span><p><strong>公平性保护默认开启</strong>年龄、性别、照片和婚育信息不会进入评分。</p></div>
+            <div className="modal-actions"><button type="button" onClick={() => setJobOpen(false)}>取消</button><button className="primary" type="submit">创建岗位</button></div>
+          </form>
         </div>
       )}
 
